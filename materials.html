@@ -2585,10 +2585,13 @@
       // Use DocumentFragment for better performance
       const fragment = document.createDocumentFragment();
 
-      filteredMaterials.forEach(material => {
+      filteredMaterials.forEach((material, index) => {
         const card = document.createElement('div');
         card.className = 'material-card';
         card.onclick = () => window.open(material.link, '_blank');
+
+        // Apply animation delay during creation for better performance
+        card.style.animationDelay = `${0.1 + (index * 0.05)}s`;
 
         card.innerHTML = `
           <div class="material-header">
@@ -2705,8 +2708,27 @@
 
         if (!query) return true;
 
-        const combined = `${material.title} ${material.subject} ${material.code} ${material.description} ${material.branch} ${material.semester} ${material.type}`.toLowerCase();
-        return combined.includes(query);
+        // Optimized search: short-circuit on first match to avoid unnecessary toLowerCase() calls
+        const titleLower = material.title.toLowerCase();
+        if (titleLower.includes(query)) return true;
+        
+        const subjectLower = material.subject.toLowerCase();
+        if (subjectLower.includes(query)) return true;
+        
+        const codeLower = material.code.toLowerCase();
+        if (codeLower.includes(query)) return true;
+        
+        const descLower = material.description.toLowerCase();
+        if (descLower.includes(query)) return true;
+        
+        const branchLower = material.branch.toLowerCase();
+        if (branchLower.includes(query)) return true;
+        
+        const semesterLower = material.semester.toLowerCase();
+        if (semesterLower.includes(query)) return true;
+        
+        const typeLower = material.type.toLowerCase();
+        return typeLower.includes(query);
       });
 
       renderMaterials(filtered);
@@ -2755,14 +2777,6 @@
     }
     
     createFloatingParticles();
-
-    // Add stagger animation delay to material cards dynamically
-    document.addEventListener('DOMContentLoaded', () => {
-      const cards = document.querySelectorAll('.material-card');
-      cards.forEach((card, index) => {
-        card.style.animationDelay = `${0.1 + (index * 0.05)}s`;
-      });
-    });
 
     // Live Viewers Feature
     let viewersList = JSON.parse(localStorage.getItem('liveViewers')) || [];
@@ -2894,19 +2908,34 @@
     updateLiveViewers();
 
     // Update viewers every 10 seconds
-    setInterval(updateLiveViewers, 10000);
+    const updateViewersInterval = setInterval(updateLiveViewers, 10000);
 
-    // Update last active time on user interaction
+    // Throttle mousemove updates to prevent excessive localStorage writes
+    let lastActivityUpdate = 0;
+    const ACTIVITY_UPDATE_THROTTLE = 5000; // Update at most once per 5 seconds
+
+    // Update last active time on user interaction (throttled)
     document.addEventListener('mousemove', () => {
+      const now = Date.now();
+      if (now - lastActivityUpdate < ACTIVITY_UPDATE_THROTTLE) {
+        return; // Skip update if too soon
+      }
+      lastActivityUpdate = now;
+
       let viewer = JSON.parse(localStorage.getItem('currentViewer'));
       if (viewer) {
-        viewer.lastActive = new Date().getTime();
+        viewer.lastActive = now;
         localStorage.setItem('currentViewer', JSON.stringify(viewer));
       }
     });
 
     // Clean up viewer on page unload
     window.addEventListener('beforeunload', () => {
+      // Clear intervals to prevent memory leaks
+      clearInterval(updateViewersInterval);
+      clearInterval(trackPageViewInterval);
+
+      // Remove current viewer from live viewers list
       const currentViewer = JSON.parse(localStorage.getItem('currentViewer'));
       let viewers = JSON.parse(localStorage.getItem('liveViewers')) || [];
       viewers = viewers.filter(v => v.id !== currentViewer.id);
@@ -3020,7 +3049,7 @@
     trackPageView();
 
     // Update stats periodically
-    setInterval(trackPageView, 30000);
+    const trackPageViewInterval = setInterval(trackPageView, 30000);
 
     // Background Color Picker Functionality
     const bgColorBtn = document.getElementById('bgColorBtn');
@@ -3100,9 +3129,16 @@
       localStorage.setItem('textColor', color);
     }
 
+    // Cache DOM elements for font and color options (populated after creation)
+    let fontOptionElements = null;
+    let colorOptionElements = null;
+
     // Update active font button
     function updateActiveFontButton(fontFamily) {
-      document.querySelectorAll('.font-option').forEach(btn => {
+      if (!fontOptionElements) {
+        fontOptionElements = document.querySelectorAll('.font-option');
+      }
+      fontOptionElements.forEach(btn => {
         const btnFamily = btn.getAttribute('data-font-family');
         if (btnFamily === fontFamily) {
           btn.classList.add('active');
@@ -3114,7 +3150,10 @@
 
     // Update active state in palette
     function updateActivePalette(color) {
-      document.querySelectorAll('.color-option').forEach(option => {
+      if (!colorOptionElements) {
+        colorOptionElements = document.querySelectorAll('.color-option');
+      }
+      colorOptionElements.forEach(option => {
         const optionColor = option.getAttribute('data-color').toLowerCase();
         const currentColor = color.toLowerCase();
         if (optionColor === currentColor) {
@@ -3132,12 +3171,21 @@
         colorOption.className = 'color-option';
         colorOption.setAttribute('data-color', color);
         colorOption.style.background = color;
-        colorOption.addEventListener('click', () => {
+        colorPalette.appendChild(colorOption);
+      });
+
+      // Initialize color options cache after elements are created
+      colorOptionElements = document.querySelectorAll('.color-option');
+
+      // Use event delegation for color options
+      colorPalette.addEventListener('click', (e) => {
+        const colorOption = e.target.closest('.color-option');
+        if (colorOption) {
+          const color = colorOption.getAttribute('data-color');
           setBackgroundColor(color);
           bgColorInput.value = color;
           bgColorInputQuick.value = color;
-        });
-        colorPalette.appendChild(colorOption);
+        }
       });
 
       // Create font selector buttons
@@ -3147,10 +3195,19 @@
         fontBtn.setAttribute('data-font-family', font.family);
         fontBtn.textContent = font.name;
         fontBtn.style.fontFamily = font.family;
-        fontBtn.addEventListener('click', () => {
-          setBodyFont(font.family);
-        });
         fontSelector.appendChild(fontBtn);
+      });
+
+      // Initialize font options cache after elements are created
+      fontOptionElements = document.querySelectorAll('.font-option');
+
+      // Use event delegation for font options
+      fontSelector.addEventListener('click', (e) => {
+        const fontBtn = e.target.closest('.font-option');
+        if (fontBtn) {
+          const fontFamily = fontBtn.getAttribute('data-font-family');
+          setBodyFont(fontFamily);
+        }
       });
     }
 
