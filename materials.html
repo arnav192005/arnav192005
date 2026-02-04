@@ -2708,14 +2708,27 @@
 
         if (!query) return true;
 
-        // Optimized search: check individual fields instead of concatenating
-        return material.title.toLowerCase().includes(query) ||
-               material.subject.toLowerCase().includes(query) ||
-               material.code.toLowerCase().includes(query) ||
-               material.description.toLowerCase().includes(query) ||
-               material.branch.toLowerCase().includes(query) ||
-               material.semester.toLowerCase().includes(query) ||
-               material.type.toLowerCase().includes(query);
+        // Optimized search: short-circuit on first match to avoid unnecessary toLowerCase() calls
+        const titleLower = material.title.toLowerCase();
+        if (titleLower.includes(query)) return true;
+        
+        const subjectLower = material.subject.toLowerCase();
+        if (subjectLower.includes(query)) return true;
+        
+        const codeLower = material.code.toLowerCase();
+        if (codeLower.includes(query)) return true;
+        
+        const descLower = material.description.toLowerCase();
+        if (descLower.includes(query)) return true;
+        
+        const branchLower = material.branch.toLowerCase();
+        if (branchLower.includes(query)) return true;
+        
+        const semesterLower = material.semester.toLowerCase();
+        if (semesterLower.includes(query)) return true;
+        
+        const typeLower = material.type.toLowerCase();
+        return typeLower.includes(query);
       });
 
       renderMaterials(filtered);
@@ -3161,6 +3174,9 @@
         colorPalette.appendChild(colorOption);
       });
 
+      // Initialize color options cache after elements are created
+      colorOptionElements = document.querySelectorAll('.color-option');
+
       // Use event delegation for color options
       colorPalette.addEventListener('click', (e) => {
         const colorOption = e.target.closest('.color-option');
@@ -3181,6 +3197,9 @@
         fontBtn.style.fontFamily = font.family;
         fontSelector.appendChild(fontBtn);
       });
+
+      // Initialize font options cache after elements are created
+      fontOptionElements = document.querySelectorAll('.font-option');
 
       // Use event delegation for font options
       fontSelector.addEventListener('click', (e) => {
