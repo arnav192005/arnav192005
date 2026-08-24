@@ -53,10 +53,20 @@
 
 ### 🏆 Featured Projects
 
-| 🤖 **Personal AI Agent** | 🧠 **AI Insight Engine** |
+| 🧠 **AI Insight Engine** | 💬 **WhatsApp AI Chatbox** |
 | :--- | :--- |
-| An intelligent and autonomous AI assistant capable of managing tasks, running searches, and interacting via Telegram. | A powerful data-driven insight engine built to process information and deliver smart, context-aware analytics. |
-| [**➥ View Repository**](https://github.com/arnav192005/personal-ai-agent) | [**➥ View Repository**](https://github.com/arnav192005/AI-INSIGHT-ENGINE) |
+| A powerful data-driven insight engine built to process information and deliver smart, context-aware analytics. | An intelligent AI chatbot integrated directly into WhatsApp for instant and automated responses. |
+| [**➥ View Repository**](https://github.com/arnav192005/AI-INSIGHT-ENGINE) | [**➥ View Repository**](https://github.com/arnav192005/whatsapp-ai-chatbox) |
+
+| 📊 **Auto Sheet Evaluator** | 💻 **CODEX** |
+| :--- | :--- |
+| Automated tool for evaluating and grading spreadsheet data efficiently. | A powerful code editor or coding assistant platform to enhance developer productivity. |
+| [**➥ View Repository**](https://github.com/arnav192005/AUTO_SHEET_EVALUATOR) | [**➥ View Repository**](https://github.com/arnav192005/CODEX) |
+
+| 📈 **DSA Visualizer** | 🌐 **Arnav Portfolio** |
+| :--- | :--- |
+| Interactive Data Structures and Algorithms visualizer to understand coding concepts better. | My personal portfolio website showcasing my skills, projects, and development experience. |
+| [**➥ View Repository**](https://github.com/arnav192005/dsa-visualizer) | [**➥ View Repository**](https://github.com/arnav192005/ARNAV_PORTFOLIO) |
 
 ---
 
